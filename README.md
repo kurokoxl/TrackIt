@@ -75,6 +75,58 @@ If you host only the frontend (e.g., GitHub Pages, Netlify):
 - Move `index.html`, `styles.css`, `app.js` to a separate `frontend` folder if desired.
 - Set `this.apiUrl` in `app.js` to your deployed backend URL.
 
+### 4. Docker (Local or Cloud)
+Build & run (framework-dependent):
+```powershell
+docker build -t trackit:local .
+docker run -d -p 8080:8080 --name trackit \ 
+  -e ASPNETCORE_ENVIRONMENT=Production \ 
+  -e AppSettings__Issuer="TrackItIssuer" \ 
+  -e AppSettings__Audience="TrackItAudience" \ 
+  -e AppSettings__Token="ChangeThisDevSecret" \ 
+  trackit:local
+```
+Visit http://localhost:8080
+
+#### SQLite Ephemeral Mode
+If you only want a quick test without SQL Server, enable the fallback:
+```powershell
+docker run -d -p 8080:8080 --name trackit-sqlite \ 
+  -e USE_SQLITE=true \ 
+  -e ASPNETCORE_ENVIRONMENT=Development trackit:local
+```
+DB file stored inside container at `/app/trackit.db` (not persisted after container removal unless you mount a volume):
+```powershell
+docker run -d -p 8080:8080 -v ${PWD}/data:/app/data \ 
+  -e USE_SQLITE=true -e SQLITE_PATH=/app/data/trackit.db trackit:local
+```
+
+### 5. GitHub Container Registry (GHCR)
+After pushing to `main`, the included workflow (`.github/workflows/docker-build.yml`) builds & pushes:
+`ghcr.io/<owner>/trackit:latest`
+
+Pull & run:
+```powershell
+docker pull ghcr.io/<owner>/trackit:latest
+docker run -d -p 8080:8080 ghcr.io/<owner>/trackit:latest
+```
+
+### 6. Render / Railway (Typical Steps)
+1. Create new web service, connect GitHub repo.
+2. Build command (Render): `dotnet publish TrackIt.csproj -c Release -o out`
+3. Start command: `dotnet TrackIt.dll`
+4. Add environment variables for `AppSettings:Issuer`, `AppSettings:Audience`, `AppSettings:Token`, and connection string if using SQL Server.
+5. For quick test choose SQLite: set `USE_SQLITE=true` and skip external DB (light usage only).
+
+### 7. Azure App Service
+1. Use Azure Portal or `az webapp up`.
+2. Configure environment variables (same as above).
+3. If using SQL Azure, update connection string `UserDatabase` in App Settings.
+4. Enable HTTPS only and (optionally) App Service logs for diagnostics.
+
+### 8. Health & Observability Enhancements (Optional)
+Add a lightweight health endpoint (e.g. `/health`) and Prometheus/OpenTelemetry integration for production.
+
 ## Production Hardening Ideas
 - Add rate limiting & robust error handling middleware.
 - Issue refresh tokens with rotation.

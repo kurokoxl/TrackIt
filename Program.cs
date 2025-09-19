@@ -8,6 +8,9 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
+// NOTE: Optional SQLite fallback uses UseSqlite extension which becomes available
+// once the Microsoft.EntityFrameworkCore.Sqlite package is added to the csproj.
+// No explicit using directive required beyond Microsoft.EntityFrameworkCore.
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,8 +87,23 @@ builder.Services.AddAuthentication("Cookies")
     });
 // Note: We're using JWT for API authentication, so we don't need cookie configuration
 // The Identity services are still needed for UserManager and user storage
-builder.Services.AddDbContext<AppDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
+// Database provider selection: default SQL Server, optional SQLite fallback for ephemeral test deployments
+var useSqlite = Environment.GetEnvironmentVariable("USE_SQLITE");
+if (!string.IsNullOrWhiteSpace(useSqlite) && useSqlite.Equals("true", StringComparison.OrdinalIgnoreCase))
+{
+    var dbPath = Path.Combine(AppContext.BaseDirectory, "trackit.db");
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite($"Data Source={dbPath}")
+    );
+    Console.WriteLine($"[Startup] Using SQLite at {dbPath}");
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase"))
+    );
+    Console.WriteLine("[Startup] Using SQL Server (UserDatabase connection string)");
+}
 
 var app = builder.Build();
 
