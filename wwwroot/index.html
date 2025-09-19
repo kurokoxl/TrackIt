@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackIt - Personal Finance Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Offline Banner -->
+    <div id="offlineBanner" class="alert alert-warning text-center py-2 mb-0" role="alert" style="display:none; border-radius:0;">
+        You are offline. Some actions may not work until connection is restored.
+    </div>
+
+    <!-- Top Progress Bar -->
+    <div id="pageProgress" aria-hidden="true"></div>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-wallet2"></i> TrackIt</a>
+            <div class="navbar-nav ms-auto align-items-center gap-2">
+                <div class="d-flex align-items-center me-2">
+                    <select id="displayCurrencySelect" class="form-select form-select-sm" style="min-width:90px;" onchange="changeDisplayCurrency(this.value)">
+                        <option value="USD">USD</option>
+                        <option value="EGP">EGP</option>
+                        <option value="SAR">SAR</option>
+                    </select>
+                </div>
+                <button id="themeToggleBtn" class="btn btn-outline-light btn-sm" type="button" title="Toggle theme" onclick="toggleTheme()">
+                    <i class="bi bi-moon-stars" id="themeToggleIcon"></i>
+                </button>
+                <span class="navbar-text me-3" id="userInfo" style="display: none;">
+                    Welcome, <span id="username"></span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" id="logoutBtn" style="display: none;" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Auth Section -->
+        <div id="authSection" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="authTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="showLogin()">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="showRegister()">Register</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <!-- Login Form -->
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" id="loginUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </button>
+                        </form>
+
+                        <!-- Register Form -->
+                        <form id="registerForm" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" id="registerUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="registerEmail">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" id="registerPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-person-plus"></i> Register
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" style="display: none;">
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 id="totalBalance">$0.00</h4>
+                                    <p class="card-text">Total Balance</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-wallet2 fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 id="totalIncome">$0.00</h4>
+                                    <p class="card-text">This Month Income</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-arrow-up-circle fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 id="totalExpenses">$0.00</h4>
+                                    <p class="card-text">This Month Expenses</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-arrow-down-circle fs-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mb-3" id="mainTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" onclick="showTab('transactions', event)">
+                        <i class="bi bi-list-ul"></i> Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showTab('categories', event)">
+                        <i class="bi bi-tags"></i> Categories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showTab('wallets', event)">
+                        <i class="bi bi-wallet"></i> Wallets
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Transactions Tab -->
+            <div id="transactionsTab" class="tab-content">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Transactions</h5>
+                                <button class="btn btn-primary btn-sm" onclick="showAddTransactionModal()">
+                                    <i class="bi bi-plus"></i> Add Transaction
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center" id="transactionToolbar">
+                                    <div class="flex-grow-1 position-relative" style="min-width:220px;">
+                                        <input type="text" id="transactionSearch" class="form-control form-control-sm" placeholder="Search transactions (local)..." oninput="debouncedSearch()">
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1" id="categoryFilterChips"></div>
+                                    <button class="btn btn-sm btn-outline-secondary d-none" id="clearFiltersBtn" onclick="clearLocalFilters()">Clear Filters</button>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-5">
+                                        <input type="date" class="form-control form-control-sm" id="filterStartDate" />
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <input type="date" class="form-control form-control-sm" id="filterEndDate" />
+                                    </div>
+                                    <div class="col-sm-2 d-grid">
+                                        <button class="btn btn-sm btn-primary" onclick="filterByDate()">
+                                            Filter
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="transactionsFilterBar" class="mb-2" style="display:none;">
+                                    <span class="badge bg-secondary me-2" id="activeWalletFilterLabel"></span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="clearTransactionFilter()">Clear</button>
+                                </div>
+                                <div id="transactionsList">
+                                    <!-- Transactions will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Quick Add</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="quickTransactionForm">
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Transaction name" id="quickName" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="number" step="0.01" class="form-control form-control-sm" placeholder="Amount" id="quickAmount" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm" id="quickWallet" required>
+                                            <option value="">Select Wallet</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm" id="quickCategory" required>
+                                            <option value="">Select Category</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-sm w-100">Add</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div id="categoriesTab" class="tab-content" style="display: none;">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Categories</h5>
+                                <button class="btn btn-primary btn-sm" onclick="showAddCategoryModal()">
+                                    <i class="bi bi-plus"></i> Add Category
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="categoriesList">
+                                    <!-- Categories will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Quick Add Category</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="quickCategoryForm">
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control" placeholder="Category name" id="quickCategoryName" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Add Category</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallets Tab -->
+            <div id="walletsTab" class="tab-content" style="display: none;">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Wallets</h5>
+                        <button class="btn btn-primary btn-sm" onclick="showAddWalletModal()">
+                            <i class="bi bi-plus"></i> Add Wallet
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="walletsList" class="wallets-grid">
+                            <!-- Wallets will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Reusable Confirm Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmTitle" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmTitle">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmBody">Are you sure?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmYesBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Transaction Modal -->
+    <div class="modal fade" id="addTransactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTransactionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="transactionName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" id="transactionAmount" required>
+                            <div class="form-text">Positive for income, negative for expenses</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Wallet</label>
+                            <select class="form-select" id="transactionWallet" required>
+                                <option value="">Select Wallet</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="transactionCategory" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="datetime-local" class="form-control" id="transactionDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="transactionDescription" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addTransaction()">Add Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCategoryForm">
+                        <div class="mb-3">
+                            <label class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addCategory()">Add Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Wallet Modal -->
+    <div class="modal fade" id="addWalletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addWalletForm">
+                        <div class="mb-3">
+                            <label class="form-label">Wallet Name</label>
+                            <input type="text" class="form-control" id="walletName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initial Balance</label>
+                            <input type="number" step="0.01" class="form-control" id="walletBalance" value="0" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addWallet()">Add Wallet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div class="modal fade" id="editTransactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editTransactionForm">
+                        <input type="hidden" id="editTransactionId">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="editTransactionName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" id="editTransactionAmount" required>
+                            <div class="form-text">Positive for income, negative for expenses</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Wallet</label>
+                            <select class="form-select" id="editTransactionWallet" required>
+                                <option value="">Select Wallet</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="editTransactionCategory" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="datetime-local" class="form-control" id="editTransactionDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editTransactionDescription" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateTransaction()">Update Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm">
+                        <input type="hidden" id="editCategoryId">
+                        <div class="mb-3">
+                            <label class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="editCategoryName" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateCategory()">Update Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Wallet Modal -->
+    <div class="modal fade" id="editWalletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editWalletForm">
+                        <input type="hidden" id="editWalletId">
+                        <div class="mb-3">
+                            <label class="form-label">Wallet Name</label>
+                            <input type="text" class="form-control" id="editWalletName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Balance</label>
+                            <input type="number" step="0.01" class="form-control" id="editWalletBalance" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateWallet()">Update Wallet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js?v=2025-09-18-02"></script>
+</body>
+</html>

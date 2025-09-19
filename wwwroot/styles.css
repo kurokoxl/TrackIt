@@ -1,0 +1,349 @@
+/* ================= THEME TOKENS ================= */
+:root {
+    /* Base palette */
+    --color-bg: #f6f7f9;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f0f2f5;
+    --color-border: #d9dee3;
+    --color-border-strong: #b9c1c9;
+    --color-text: #1f2429;
+    --color-text-muted: #6b7785;
+    --color-accent: #0d9488; /* teal */
+    --color-accent-hover: #0b7d73;
+    --color-accent-rgb: 13,148,136;
+    --color-accent-alt: #f59e0b; /* amber */
+    --color-danger: #dc2626;
+    --color-success: #059669;
+    --color-expense: #ef4444;
+    --color-income: #16a34a;
+    --color-focus-ring: rgba(13,148,136,0.35);
+    --gradient-accent: linear-gradient(90deg,#0d9488,#14b8a6);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06); 
+    --shadow-md: 0 4px 10px -2px rgba(0,0,0,0.08); 
+    --shadow-lg: 0 8px 24px -6px rgba(0,0,0,0.14);
+    --radius-xs: 4px; --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+    --transition: 0.18s cubic-bezier(.4,.0,.2,1);
+    --font-stack: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    --wallet-grid-gap: 1rem;
+    --wallet-min-width: 260px;
+    --color-warning: #d97706;
+    --color-info: #0369a1;
+}
+
+body.theme-dark {
+    --color-bg: #0f1417;
+    --color-surface: #182025;
+    --color-surface-alt: #1f2a31;
+    --color-border: #2b3942;
+    --color-border-strong: #3a4a55;
+    --color-text: #f3f6f8;
+    --color-text-muted: #9caab5;
+    --color-focus-ring: rgba(45,212,191,0.4);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
+    --shadow-md: 0 4px 10px -2px rgba(0,0,0,0.55);
+    --shadow-lg: 0 10px 32px -8px rgba(0,0,0,0.65);
+}
+
+/* Global Progress Bar (uses accent gradient) */
+#pageProgress { position:fixed; top:0; left:0; right:0; height:3px; background:var(--gradient-accent); background-size:200% 100%; transform:scaleX(0); transform-origin:left; transition:transform .3s ease; z-index:2000; }
+.progress-active #pageProgress { transform:scaleX(1); animation:progressStripe 1.2s linear infinite; }
+@keyframes progressStripe { 0%{background-position:0 0;} 100%{background-position:200% 0;} }
+
+/* Skeleton loader */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: #e9ecef;
+    border-radius: 6px;
+}
+.skeleton::after {
+    content: '';
+    position: absolute; inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* Subtle content transitions */
+.fade-in { animation: fadeIn 0.2s ease-in; }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+/* Custom Styles for TrackIt */
+
+/* ================= BASE GLOBALS ================= */
+body { background: var(--color-bg); font-family: var(--font-stack); color: var(--color-text); -webkit-font-smoothing: antialiased; }
+body, html { min-height:100%; }
+::selection { background: rgba(var(--color-accent-rgb),0.25); }
+
+.navbar { background: var(--color-surface); border-bottom:1px solid var(--color-border); box-shadow: var(--shadow-sm); }
+.navbar .navbar-brand { color: var(--color-text); }
+.navbar-dark .navbar-nav .nav-link, .navbar .navbar-text, .navbar .btn { color: var(--color-text); }
+body.theme-dark .navbar { background: var(--color-surface-alt); }
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary, .btn-success { background: var(--color-accent); border:1px solid var(--color-accent); color:#fff; }
+.btn-primary:hover, .btn-success:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+.btn-outline-light { background: transparent; border:1px solid var(--color-border); color: var(--color-text); }
+.btn-outline-light:hover { background: var(--color-surface-alt); color: var(--color-text); }
+.btn-outline-secondary { border:1px solid var(--color-border); color: var(--color-text); background: var(--color-surface-alt); }
+.btn-outline-secondary:hover { background: var(--color-surface); }
+.btn:focus-visible { box-shadow: 0 0 0 3px var(--color-focus-ring); outline:none; }
+
+.form-control, .form-select { border-radius: var(--radius-sm); border:1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-text); transition: var(--transition); }
+.form-control:focus, .form-select:focus { border-color: var(--color-accent); box-shadow: 0 0 0 4px var(--color-focus-ring); }
+body.theme-dark .form-control, body.theme-dark .form-select { background: var(--color-surface-alt); }
+
+.nav-tabs .nav-link {
+    border-radius: 8px 8px 0 0;
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-tabs { border-bottom:1px solid var(--color-border); }
+.nav-tabs .nav-link { color: var(--color-text-muted); font-weight:500; border:none; padding: .65rem 1rem; position:relative; }
+.nav-tabs .nav-link.active { color: var(--color-text); background: var(--color-surface); border:1px solid var(--color-border); border-bottom-color: var(--color-surface); border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.nav-tabs .nav-link:not(.active):hover { color: var(--color-text); }
+
+.transaction-item { border-left:4px solid var(--color-border); padding:12px 14px; margin-bottom:10px; background: var(--color-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; transition: var(--transition); box-shadow: var(--shadow-sm); }
+.transaction-item:hover { border-left-color: var(--color-accent); box-shadow: var(--shadow-md); transform: translateX(2px); }
+.transaction-item.income { border-left-color: var(--color-income); }
+.transaction-item.expense { border-left-color: var(--color-expense); }
+body.theme-dark .transaction-item { background: var(--color-surface-alt); }
+
+.category-badge { background: var(--color-accent); color:#fff; padding:2px 8px; border-radius: 999px; font-size: .65rem; letter-spacing:.5px; text-transform:uppercase; font-weight:600; }
+.category-badge.alt { background: var(--color-accent-alt); }
+
+.wallets-grid { display:flex; flex-wrap:wrap; gap: var(--wallet-grid-gap); }
+.wallet-card { flex:1 1 var(--wallet-min-width); background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding:18px 18px 12px; position:relative; overflow:hidden; min-width:var(--wallet-min-width); max-width:340px; box-shadow: var(--shadow-sm); transition: var(--transition); display:flex; flex-direction:column; }
+.wallet-card:before { content:''; position:absolute; inset:0; background: radial-gradient(circle at 80% 10%, rgba(var(--color-accent-rgb),0.20), transparent 65%); opacity:.6; pointer-events:none; }
+.wallet-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+body.theme-dark .wallet-card { background: var(--color-surface-alt); }
+.wallet-card h5 { font-size:1rem; font-weight:600; margin:0 0 4px; letter-spacing:.3px; display:flex; align-items:center; gap:.35rem; }
+.wallet-card .balance { font-size:1.35rem; font-weight:700; letter-spacing:.5px; color: var(--color-text); }
+body.theme-dark .wallet-card .balance { color: var(--color-text); }
+.wallet-card .wallet-actions { margin-left:auto; display:flex; gap:.35rem; }
+.wallet-card .wallet-actions .btn { --bs-btn-padding-y:.3rem; --bs-btn-padding-x:.55rem; font-size:.75rem; border-radius: var(--radius-xs); background: var(--color-surface-alt); border:1px solid var(--color-border); }
+body.theme-dark .wallet-card .wallet-actions .btn { background: var(--color-surface); }
+.wallet-card .wallet-actions .btn:hover { background: var(--color-surface); }
+.wallet-card .tx-container { margin-top:.75rem; border-top:1px dashed var(--color-border); padding-top:.5rem; }
+.wallet-card .tx-container .small { color: var(--color-text-muted); }
+.wallet-card .badge-balance-diff { font-size:.55rem; letter-spacing:.5px; }
+
+.tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.toast {
+    border-radius: 8px;
+}
+
+.toast-header {
+    border-radius: 8px 8px 0 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.empty-state { text-align:center; padding:40px 20px; color: var(--color-text-muted); }
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+    }
+    
+    .wallet-card {
+        text-align: center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .modal-dialog {
+        margin: 10px;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track { background: var(--color-surface-alt); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* Loading spinner */
+.spinner { border:3px solid var(--color-border); border-top:3px solid var(--color-accent); border-radius:50%; width:30px; height:30px; animation:spin 1s linear infinite; margin:20px auto; }
+
+/* Cards modernize */
+.card { background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); transition: var(--transition); }
+.card:hover { box-shadow: var(--shadow-md); }
+body.theme-dark .card { background: var(--color-surface-alt); }
+.card-header { background: transparent; border-bottom:1px solid var(--color-border); font-weight:600; }
+
+/* Toast color alignment */
+.toast.bg-success { background: var(--color-success)!important; }
+.toast.bg-danger { background: var(--color-danger)!important; }
+.toast.bg-warning { background: var(--color-warning)!important; }
+.toast.bg-primary { background: var(--color-info)!important; }
+
+/* Utility */
+.text-muted { color: var(--color-text-muted)!important; }
+hr { border-color: var(--color-border); opacity:1; }
+
+/* Dark adjustments for tabs container background spacing */
+body.theme-dark .nav-tabs .nav-link.active { background: var(--color-surface-alt); border-color: var(--color-border); border-bottom-color: var(--color-surface-alt); }
+
+/* Category chips area buttons */
+#categoryFilterChips .btn { border-radius: 999px; font-size:.65rem; padding:.25rem .6rem; line-height:1; }
+#categoryFilterChips .btn-outline-light { background: var(--color-surface-alt); border-color: var(--color-border); color: var(--color-text-muted); }
+#categoryFilterChips .btn-outline-light:hover { color: var(--color-text); }
+#categoryFilterChips .btn-primary { background: var(--color-accent); border-color: var(--color-accent); }
+
+/* Date group toggle button */
+button[id^="dg-btn-"] { background: var(--color-surface-alt); border:1px solid var(--color-border); }
+button[id^="dg-btn-"]:hover { background: var(--color-surface); }
+
+/* Wallet transactions mini list inside wallet cards */
+.wallet-card .tx-row { display:flex; justify-content:space-between; padding:4px 0; font-size:.75rem; border-bottom:1px dashed var(--color-border); }
+.wallet-card .tx-row:last-child { border-bottom:none; }
+.wallet-card .tx-row .amt { font-weight:600; }
+.wallet-card .tx-row .amt.positive { color: var(--color-income); }
+.wallet-card .tx-row .amt.negative { color: var(--color-expense); }
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ====== APPENDED ENHANCEMENTS (override earlier definitions) ====== */
+/* Prevent height syncing */
+.wallets-grid { align-items:flex-start; }
+.wallet-card { align-self:flex-start; }
+/* Wallet action icons refinement */
+.wallet-card .wallet-actions { margin-left:auto; display:flex; gap:.3rem; opacity:0; transform:translateY(-4px); transition: var(--transition); }
+.wallet-card:hover .wallet-actions, .wallet-card:focus-within .wallet-actions { opacity:1; transform:translateY(0); }
+.wallet-card .wallet-actions .btn { display:none; } /* hide old button group if still rendered */
+.icon-btn { background: var(--color-surface-alt); border:1px solid var(--color-border); width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius: var(--radius-sm); padding:0; cursor:pointer; color: var(--color-text); transition: var(--transition); font-size:.85rem; }
+body.theme-dark .icon-btn { background: var(--color-surface); }
+.icon-btn:hover { background: var(--color-accent); color:#fff; border-color: var(--color-accent); }
+.icon-btn.danger:hover { background: var(--color-danger); border-color: var(--color-danger); }
+.icon-btn.neutral:hover { background: var(--color-surface-alt); color: var(--color-text); }
+
+/* Typography tweaks */
+body.theme-dark .transaction-item small { color: var(--color-text-muted); }
+h4,h5,h6 { color: var(--color-text); letter-spacing:.3px; }
+.card-header h5, .card-header h6 { font-weight:600; }
+small, .small { line-height:1.25; }
+.wallet-card h5 { font-size: .95rem; font-weight:600; opacity:.85; }
+.wallet-card .balance { font-size:1.4rem; line-height:1.1; }
+.wallet-card .tx-container { font-size:.7rem; }
+
+/* Category list items */
+.category-item { background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); padding:14px 16px; display:flex; align-items:center; gap:1rem; position:relative; box-shadow: var(--shadow-sm); transition: var(--transition); }
+.category-item + .category-item { margin-top:.75rem; }
+.category-item:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+body.theme-dark .category-item { background: var(--color-surface-alt); }
+.category-item .name { font-weight:600; letter-spacing:.3px; flex-grow:1; }
+.category-item .actions { display:flex; gap:.4rem; }
+.category-item .icon-btn { width:32px; height:32px; }
+
+/* Input placeholder contrast */
+::placeholder { color: var(--color-text-muted); opacity:.6; }
+body.theme-dark ::placeholder { color: var(--color-text-muted); opacity:.45; }
+
+/* Monetary values alignment */
+.balance, .transaction-item .fw-bold { font-variant-numeric: tabular-nums; }
+/* ====== DARK MODE ICON / FONT CONTRAST TWEAKS (appended) ====== */
+body.theme-dark .icon-btn { color: var(--color-text-muted); }
+body.theme-dark .icon-btn:hover { color:#fff; }
+body.theme-dark .wallet-card .wallet-actions .icon-btn.neutral:hover { background: var(--color-surface-alt); color: var(--color-text); }
+body.theme-dark button[id^="dg-btn-"] { background: var(--color-surface); color: var(--color-text-muted); }
+body.theme-dark button[id^="dg-btn-"]:hover { background: var(--color-surface-alt); color: var(--color-text); }
+body.theme-dark .transaction-item strong { color: var(--color-text); }
+/* Strengthen dark mode readability for transaction & category names */
+body.theme-dark .transaction-item strong,
+body.theme-dark .transaction-item .category-badge,
+body.theme-dark .category-item .name {
+    color: #f5f9fa !important; /* slightly brighter than var(--color-text) */
+    text-shadow: 0 0 1px rgba(0,0,0,0.4);
+}
+body.theme-dark .transaction-item .category-badge { background: var(--color-accent); }
+body.theme-dark .transaction-item.income { border-left-color: var(--color-income); }
+body.theme-dark .transaction-item.expense { border-left-color: var(--color-expense); }
+body.theme-dark .transaction-item .btn-group .btn { background: var(--color-surface); border-color: var(--color-border); color: var(--color-text-muted); }
+body.theme-dark .transaction-item .btn-group .btn:hover { background: var(--color-accent); border-color: var(--color-accent); color:#fff; }
+/* Further boost for category list readability in dark mode */
+body.theme-dark .category-item { background: #202a31; border-color: #32424d; }
+body.theme-dark .category-item .name { color:#ffffff !important; opacity:1 !important; text-shadow:0 0 2px rgba(0,0,0,0.55); }
+body.theme-dark .category-item:hover { background:#243039; }
+/* Increase padding inside to visually separate rows slightly */
+body.theme-dark .category-item { padding:16px 18px; }
+/* Make sure light theme keeps intended vivid color for action buttons */
+.transaction-item .btn-group .btn { transition: var(--transition); }
+.transaction-item .btn-group .btn:hover { filter: brightness(1.05); }
+/* Navbar / tab icons subtle muted baseline in dark mode */
+body.theme-dark .nav-tabs .nav-link i, body.theme-dark .navbar .nav-link i, body.theme-dark .navbar-brand i { color: var(--color-text-muted); transition: var(--transition); }
+body.theme-dark .nav-tabs .nav-link.active i, body.theme-dark .nav-tabs .nav-link:hover i, body.theme-dark .navbar .nav-link:hover i, body.theme-dark .navbar-brand:hover i { color: var(--color-text); }
+/* Improve placeholder contrast for very dark backgrounds while keeping WCAG contrast */
+body.theme-dark ::placeholder { opacity:.55; }
+
+/* ===== Dark mode form & modal contrast enhancements ===== */
+body.theme-dark .modal-content { background: #1b252b; border:1px solid #2f3b43; box-shadow:0 6px 32px -4px rgba(0,0,0,0.65); }
+body.theme-dark .modal-header, body.theme-dark .modal-footer { border-color:#2d3a42; }
+body.theme-dark label { color:#dbe4ea; font-weight:500; }
+body.theme-dark .form-control, body.theme-dark .form-select { background:#233038; color:#ecf3f6; border-color:#32424d; }
+body.theme-dark .form-control:focus, body.theme-dark .form-select:focus { background:#25343d; border-color: var(--color-accent); }
+body.theme-dark .form-control[readonly] { background:#1f2930; color:#c8d3d9; }
+body.theme-dark .form-text, body.theme-dark .modal small, body.theme-dark .modal .small { color:#93a4af; }
+body.theme-dark .btn-close { filter: invert(90%); }
+body.theme-dark .modal-title { color:#f2f7f9; }
+/* Make invalid feedback readable */
+body.theme-dark .is-invalid, body.theme-dark .was-validated .form-control:invalid { border-color:#ef4444; }
+body.theme-dark .invalid-feedback { color:#fca5a5; }
+
+/* Currency indicator badge (optional future use) */
+.currency-badge { background: var(--color-accent); color:#fff; font-size:.55rem; padding:2px 6px; border-radius:999px; letter-spacing:.5px; text-transform:uppercase; font-weight:600; }
+body.theme-dark .currency-badge { background: linear-gradient(90deg,#0d9488,#119e92); }
