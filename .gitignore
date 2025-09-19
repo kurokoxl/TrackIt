@@ -1,0 +1,51 @@
+# ---- Core build artifacts ----
+bin/
+obj/
+
+# VS / VS Code
+.vscode/
+*.user
+*.suo
+*.userprefs
+*.csproj.user
+*.vs/
+
+# Logs / diagnostics
+*.log
+logs/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Coverage / test
+coverage/
+*.coverage
+*.coveragexml
+
+# EF Core Migrations design-time bundle (if any)
+*migrationsBundle*
+
+# Secrets (adjust as needed)
+secrets.json
+appsettings.*.local.json
+
+# Publish outputs
+publish/
+
+# Node / frontend (if added later)
+node_modules/
+
+# Tooling caches
+.nuget/
+.npm/
+.python-cache/
+
+# JetBrains Rider
+.idea/
+*.iml
+
+# Additional transient
+~$*
+*.tmp
+*.temp
