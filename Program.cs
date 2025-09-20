@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 // NOTE: Optional SQLite fallback uses UseSqlite extension which becomes available
 // once the Microsoft.EntityFrameworkCore.Sqlite package is added to the csproj.
 // No explicit using directive required beyond Microsoft.EntityFrameworkCore.
@@ -72,21 +73,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
-builder.Services.AddAuthentication("Cookies")
-    .AddCookie("Cookies", options =>
-    {
-        // How long the cookie lives
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-
-        // Should the cookie refresh its lifetime with each request?
-        options.SlidingExpiration = true;
-
-        // Where to redirect if unauthorized (for MVC apps)
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-    });
-// Note: We're using JWT for API authentication, so we don't need cookie configuration
-// The Identity services are still needed for UserManager and user storage
+// NOTE: Removed Cookie authentication registration to avoid 302 redirects to /Account/Login in API scenarios.
+// Identity still provides user management; JWT handles auth.
 // Database provider selection: default SQL Server, optional SQLite fallback for ephemeral test deployments
 var useSqlite = Environment.GetEnvironmentVariable("USE_SQLITE");
 if (!string.IsNullOrWhiteSpace(useSqlite) && useSqlite.Equals("true", StringComparison.OrdinalIgnoreCase))
@@ -105,7 +93,48 @@ else
     Console.WriteLine("[Startup] Using SQL Server (UserDatabase connection string)");
 }
 
+// Basic CORS (allow same-origin and simple JS usage). Adjust origins as needed.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Default", policy =>
+    {
+        policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().SetIsOriginAllowed(_ => true);
+    });
+});
+
 var app = builder.Build();
+
+// Validate critical JWT settings early (avoid silent null leading to runtime exception)
+string? tokenKey = builder.Configuration["AppSettings:Token"]; // should be long
+if (string.IsNullOrWhiteSpace(tokenKey) || tokenKey.Length < 32)
+{
+    Console.WriteLine("[Startup][WARN] AppSettings:Token is missing or too short. Set a strong secret via environment variables.");
+}
+
+// Forwarded headers (Railway / reverse proxy) to ensure https scheme recognized
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+// Apply pending migrations automatically (useful for SQLite / ephemeral envs)
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (db.Database.GetPendingMigrations().Any())
+        {
+            Console.WriteLine("[Startup] Applying pending migrations...");
+            db.Database.Migrate();
+            Console.WriteLine("[Startup] Migrations applied.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Startup] Migration error: {ex.Message}");
+    }
+}
 
 // ✅ Enable static file serving
 app.UseDefaultFiles();  // Serves index.html as default
@@ -126,7 +155,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+// Only enforce HTTPS redirection if request came in as HTTP and platform supports it
 app.UseHttpsRedirection();
+
+app.UseCors("Default");
 
 app.UseAuthentication();
 app.UseAuthorization();
