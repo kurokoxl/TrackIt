@@ -6,9 +6,12 @@ class TrackItApp {
         this.apiUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:5026' 
             : window.location.origin;
-        console.log('=== API URL CONFIGURED ===');
-        console.log('Hostname:', window.location.hostname);
-        console.log('API URL:', this.apiUrl);
+        const __DEV_LOG = (window.location.hostname === 'localhost');
+        if (__DEV_LOG) {
+            console.log('=== API URL CONFIGURED ===');
+            console.log('Hostname:', window.location.hostname);
+            console.log('API URL:', this.apiUrl);
+        }
         // Frontend currency display system (base stored in DB = USD)
         this.ratesFromUSD = { USD: 1, EGP: 49.00, SAR: 3.75 }; // placeholder static rates
         this.supportedDisplayCurrencies = Object.keys(this.ratesFromUSD);
@@ -39,19 +42,19 @@ class TrackItApp {
             if (icon) { icon.classList.remove('bi-moon-stars'); icon.classList.add('bi-sun'); }
         }
         
-        // Debug token loading
-        console.log('=== INIT DEBUG ===');
-        console.log('Token from localStorage:', localStorage.getItem('authToken'));
-        console.log('Current token in class:', this.token);
-        
-        console.log('APP_JS_VERSION: 2025-09-16-02');
+        if (__DEV_LOG) {
+            console.log('=== INIT DEBUG ===');
+            console.log('Token from localStorage:', localStorage.getItem('authToken'));
+            console.log('Current token in class:', this.token);
+            console.log('APP_JS_VERSION: 2025-09-20-02');
+        }
         // Check if user is already logged in
         if (this.token && typeof this.token === 'string' && this.token.trim().length > 10) {
-            console.log('Token exists, showing dashboard');
+            if (__DEV_LOG) console.log('Token exists, showing dashboard');
             this.showDashboard();
             this.loadDashboardData();
         } else {
-            console.log('No token, staying on auth page');
+            if (__DEV_LOG) console.log('No token, staying on auth page');
         }
         
         // Set current date-time for transaction form
