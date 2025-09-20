@@ -1,5 +1,5 @@
 // TrackIt Frontend Application
-// APP_JS_VERSION 2025-09-20-01
+// APP_JS_VERSION 2025-09-20-02
 class TrackItApp {
     constructor() {
         // Auto-detect API URL: use current origin in production, localhost in development
@@ -137,14 +137,24 @@ class TrackItApp {
             });
             
             let data;
-            try { data = await response.json(); } catch { /* fallback later */ }
+            let rawText = '';
+            try { 
+                data = await response.json(); 
+            } catch { 
+                // If JSON parsing fails, try to get text (but response might be consumed)
+                try {
+                    rawText = await response.text();
+                } catch {
+                    rawText = 'Unknown error';
+                }
+            }
             if (response.ok) {
                 this.showToast((data && (data.message || data.Message)) || 'Registration successful! Please login.', 'success');
                 this.showLogin();
                 // Clear registration form
                 document.getElementById('registerForm').reset();
             } else {
-                let errorMessage = (data && (data.message || data.Message)) || (await response.text()) || 'Registration failed';
+                let errorMessage = (data && (data.message || data.Message)) || rawText || `Registration failed (${response.status})`;
                 this.showToast(errorMessage, 'error');
             }
         } catch (error) {
