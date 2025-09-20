@@ -74,6 +74,10 @@
               "target": "Package",
               "version": "[9.0.8, )"
             },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[9.0.8, )"
+            },
             "Scalar.AspNetCore": {
               "target": "Package",
               "version": "[2.7.2, )"

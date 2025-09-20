@@ -2,7 +2,10 @@
 // APP_JS_VERSION 2025-09-18-02
 class TrackItApp {
     constructor() {
-        this.apiUrl = 'http://localhost:5026'; // Adjust to match your backend port
+        // Auto-detect API URL: use current origin in production, localhost in development
+        this.apiUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5026' 
+            : window.location.origin;
         // Frontend currency display system (base stored in DB = USD)
         this.ratesFromUSD = { USD: 1, EGP: 49.00, SAR: 3.75 }; // placeholder static rates
         this.supportedDisplayCurrencies = Object.keys(this.ratesFromUSD);
